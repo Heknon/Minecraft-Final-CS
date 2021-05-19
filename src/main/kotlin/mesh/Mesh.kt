@@ -1,6 +1,6 @@
 package mesh
 
-import Texture
+import texture.Texture
 import org.lwjgl.opengl.GL15
 import org.lwjgl.opengl.GL30.*
 import org.lwjgl.system.MemoryUtil
@@ -38,7 +38,7 @@ class Mesh(positions: FloatArray, textCoords: FloatArray, indices: IntArray, pri
             glEnableVertexAttribArray(0)
             glVertexAttribPointer(0, 3, GL15.GL_FLOAT, false, 0, 0)
 
-            // Texture VBO
+            // texture.Texture VBO
             textureVboId = GL15.glGenBuffers()
             textureBuffer = MemoryUtil.memAllocFloat(textCoords.size)
             textureBuffer.put(textCoords).flip()

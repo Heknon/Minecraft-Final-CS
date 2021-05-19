@@ -1,6 +1,8 @@
+import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.InputStream
 import java.nio.ByteBuffer
 import java.util.*
+
 
 fun String.loadResource(): String {
     return try {
@@ -17,4 +19,11 @@ fun String.loadResourceAsByteBuffer(): ByteBuffer {
     val buf = ByteBuffer.wrap(imgBytes)
     println(imgBytes)
     return buf
+}
+
+val objMapper = ObjectMapper()
+
+fun String.readResourceAsJson(): Map<*, *> {
+    val map: Map<*, *> = objMapper.readValue(javaClass.getResourceAsStream(this), MutableMap::class.java)
+    return map
 }

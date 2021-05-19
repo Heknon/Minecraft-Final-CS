@@ -11,6 +11,8 @@ fun main() {
 * TextureAtlas class that manages the texture pack, allows you to rescue a texture at certain row and column
 * Smarter block class for building block and its texture from json file (https://github.com/Hopson97/MineCraft-One-Week-Challenge/tree/master/Res/Blocks)
 * Chunk system
+* optimize chunk system to have the sides of chunk be one vector
+* Face culling
 * Entity (For future multiplayer support), skins
 * Very simple world gen
 * Multiplayer
@@ -25,7 +27,8 @@ fun main() {
 * mobs
 * day and night
 * better, cooler, physically based lighting (https://learnopengl.com/PBR/Theory)
-*
+* Chat
+* Voice chat
 * */
 
 class Game(private val title: String, private val width: Int, private val height: Int) : Runnable {

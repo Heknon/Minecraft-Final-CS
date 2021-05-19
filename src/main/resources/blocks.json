@@ -1,0 +1,37 @@
+{
+  "air": {
+    "id": 0,
+    "name": "Air",
+    "texture": {
+      "all": [4, 1]
+    },
+    "collidable": false
+  },
+  "grass": {
+    "id": 1,
+    "name": "Grass",
+    "texture": {
+      "top": [0, 0],
+      "bottom": [2, 0],
+
+      "sides": [1, 0]
+    },
+    "collidable": true
+  },
+  "dirt": {
+    "id": 2,
+    "name": "Dirt",
+    "texture": {
+      "all": [2, 0]
+    },
+    "collidable": true
+  },
+  "water": {
+    "id": 3,
+    "name": "Water",
+    "texture": {
+      "all": [15, 15]
+    },
+    "collidable": true
+  }
+}

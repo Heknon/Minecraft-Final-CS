@@ -34,6 +34,17 @@ class MouseInput(private val window: Window) {
             leftButtonPressed = button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS
             rightButtonPressed = button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS
         }
+
+        disableMouseVisibility()
+    }
+
+    fun disableMouseVisibility() {
+        glfwSetInputMode(window.windowId, GLFW_CURSOR, GLFW_CURSOR_HIDDEN)
+        glfwSetInputMode(window.windowId, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
+    }
+
+    fun enableMouse() {
+        glfwSetInputMode(window.windowId, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
     }
 
     fun input() {
