@@ -8,10 +8,12 @@ fun main() {
 }
 
 /*
-* TextureAtlas class that manages the texture pack, allows you to rescue a texture at certain row and column
-* Smarter block class for building block and its texture from json file (https://github.com/Hopson97/MineCraft-One-Week-Challenge/tree/master/Res/Blocks)
+* REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR
+*
+* TextureAtlas class that manages the texture pack, allows you to rescue a texture at certain row and column ✓
+* Smarter block class for building block and its texture from json file (https://github.com/Hopson97/MineCraft-One-Week-Challenge/tree/master/Res/Blocks) (Almost done need refactor)
 * Chunk system
-* optimize chunk system to have the sides of chunk be one vector
+* optimize chunk system to have the sides of chunk be one vector group with textures
 * Face culling
 * Entity (For future multiplayer support), skins
 * Very simple world gen
