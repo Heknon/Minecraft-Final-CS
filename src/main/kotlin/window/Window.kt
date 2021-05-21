@@ -1,9 +1,9 @@
+package window
+
 import org.lwjgl.glfw.Callbacks
 import org.lwjgl.glfw.GLFW.*
-import org.lwjgl.glfw.GLFW.glfwSwapBuffers
 import org.lwjgl.glfw.GLFWErrorCallback
 import org.lwjgl.opengl.GL
-import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.system.MemoryStack.stackPush
 import org.lwjgl.system.MemoryUtil.NULL
@@ -32,10 +32,10 @@ class Window(width: Int, height: Int, title: String) {
             throw IllegalStateException("Unable to initialize GLFW!")
         }
 
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3)
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2)
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE)
 
         val window = glfwCreateWindow(width, height, title, NULL, NULL)
         windowId = window
@@ -81,7 +81,7 @@ class Window(width: Int, height: Int, title: String) {
         glEnable(GL_TEXTURE_2D)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
+        glClearColor(135 / 256f, 206 / 256f, 235 / 256f, 0.0f)
     }
 
     fun open() {

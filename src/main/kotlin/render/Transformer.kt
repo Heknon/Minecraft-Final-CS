@@ -1,7 +1,10 @@
-import mesh.WorldObject
-import org.joml.Matrix4f
+package render
 
-class Transformation(private val window: Window, private val camera: Camera) {
+import org.joml.Matrix4f
+import render.mesh.WorldObject
+import window.Window
+
+class Transformer(private val window: Window, private val camera: Camera) {
     private val projectionMatrix = Matrix4f()
     private val modelView = Matrix4f()
 

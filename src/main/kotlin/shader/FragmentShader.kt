@@ -9,5 +9,4 @@ class FragmentShader(
     shaderCode,
     GL20.GL_FRAGMENT_SHADER,
     programId
-) {
-}
+)

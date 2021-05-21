@@ -1,23 +1,22 @@
-package mesh
+package world.chunk.block
 
-import readResourceAsJson
-import texture.TextureAtlas
-import world.Block
+import render.texture.TextureProvider
+import utility.readResourceAsJson
 
-class BlockProvider(private val textureAtlas: TextureAtlas) {
+class BlockProvider(private val textureProvider: TextureProvider) {
     // Create block meshes from json
     // hand over to block container to be handled by world
 
     private val blocksJson = "/blocks.json".readResourceAsJson()
-    val blocks: MutableMap<Int, Block> = mutableMapOf()
+    val blocks: MutableMap<Int, BlockData> = mutableMapOf()
 
-    enum class FaceDirection {
-        Top,
-        Bottom,
-        Left,
-        Right,
-        Front,
-        Back,
+    enum class Direction {
+        Up,
+        Down,
+        West,
+        East,
+        North,
+        South,
         All
     }
 
@@ -25,24 +24,16 @@ class BlockProvider(private val textureAtlas: TextureAtlas) {
         val positions: FloatArray,
         val uvs: FloatArray,
         val indices: IntArray,
-        val faceDirection: FaceDirection
+        val direction: Direction
     )
 
     private val sides = setOf(
-        FaceDirection.Back,
-        FaceDirection.Front,
-        FaceDirection.Right,
-        FaceDirection.Left,
+        Direction.South,
+        Direction.North,
+        Direction.East,
+        Direction.West,
     )
 
-    private val faceOrder = arrayOf(
-        FaceDirection.Top,
-        FaceDirection.Bottom,
-        FaceDirection.Left,
-        FaceDirection.Right,
-        FaceDirection.Front,
-        FaceDirection.Back,
-    )
 
     private val positions = floatArrayOf(
         // TOP FACE
@@ -85,7 +76,7 @@ class BlockProvider(private val textureAtlas: TextureAtlas) {
     init {
 
         blocksJson.keys.forEach { k ->
-            val faces = mutableListOf<BlockFaceMesh>()
+            val faces = mutableMapOf<Direction, BlockFaceMesh>()
             val blockData = blocksJson[k] as Map<*, *>
             val textureData = blockData["texture"] as Map<String, List<Int>>
 
@@ -96,15 +87,15 @@ class BlockProvider(private val textureAtlas: TextureAtlas) {
 
                 val textureCoords = when {
                     textureData.containsKey("all") ->
-                        textureAtlas.getTexture(textureData["all"]!![0], textureData["all"]!![1])
+                        textureProvider.getTexture(textureData["all"]!![0], textureData["all"]!![1])
                     textureData.containsKey("sides") && sides.contains(i) ->
-                        textureAtlas.getTexture(textureData["sides"]!![0], textureData["sides"]!![1])
+                        textureProvider.getTexture(textureData["sides"]!![0], textureData["sides"]!![1])
                     textureData.containsKey(i.name.toLowerCase()) ->
-                        textureAtlas.getTexture(
+                        textureProvider.getTexture(
                             textureData[i.name.toLowerCase()]!![0],
                             textureData[i.name.toLowerCase()]!![1]
                         )
-                    else -> textureAtlas.empty()
+                    else -> textureProvider.emptyTexture()
                 }
 
                 val face = BlockFaceMesh(
@@ -114,19 +105,23 @@ class BlockProvider(private val textureAtlas: TextureAtlas) {
                     i
                 )
 
-                println(face)
-                faces.add(face)
+                faces[i] = face
             }
 
-            val block = Block(
+            val block = BlockData(
                 blockData["id"] as Int,
                 blockData["name"] as String,
                 faces,
-                blockData["collidable"] as Boolean
+                blockData["collidable"] as Boolean,
+                blockData["transparent"] as Boolean? ?: false
             )
 
             blocks[block.id] = block
         }
+    }
+
+    companion object {
+        val faceOrder = Direction.values().dropLast(1)
     }
 
 }

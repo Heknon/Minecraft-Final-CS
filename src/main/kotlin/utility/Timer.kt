@@ -1,3 +1,5 @@
+package utility
+
 class Timer {
     private var lastLoopTime: Double = getTime()
 

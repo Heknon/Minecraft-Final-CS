@@ -1,6 +1,10 @@
 import org.lwjgl.Version
-import org.lwjgl.glfw.GLFW.*
+import org.lwjgl.glfw.GLFW.glfwSetErrorCallback
+import org.lwjgl.glfw.GLFW.glfwTerminate
 import org.lwjgl.opengl.GL11.*
+import utility.Timer
+import window.MouseInput
+import window.Window
 
 fun main() {
     val main = Game("Minecraft", 600, 480)
@@ -8,13 +12,23 @@ fun main() {
 }
 
 /*
-* REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR REFACTOR
+* NEAR FUTURE:
+* Fix transparency, make renderer from transparent stuff
+* sprite renderer
+* World generation (Biomes n' shit)
+* Player class
+* Hit detection
+* Inventory
+* GUI (Hotbar)
+* Settings
+* Simple lighting
+* Day and night
+* Skybox
 *
+* FUTURE:
 * TextureAtlas class that manages the texture pack, allows you to rescue a texture at certain row and column ✓
-* Smarter block class for building block and its texture from json file (https://github.com/Hopson97/MineCraft-One-Week-Challenge/tree/master/Res/Blocks) (Almost done need refactor)
-* Chunk system
-* optimize chunk system to have the sides of chunk be one vector group with textures
-* Face culling
+* Smarter block class for building block and its texture from json file (https://github.com/Hopson97/MineCraft-One-Week-Challenge/tree/master/Res/Blocks) ✓
+* Chunk system (Almost done)
 * Entity (For future multiplayer support), skins
 * Very simple world gen
 * Multiplayer
@@ -31,6 +45,8 @@ fun main() {
 * better, cooler, physically based lighting (https://learnopengl.com/PBR/Theory)
 * Chat
 * Voice chat
+* Launcher
+* Authentication - multiplayer authentication
 * */
 
 class Game(private val title: String, private val width: Int, private val height: Int) : Runnable {
@@ -62,7 +78,7 @@ class Game(private val title: String, private val width: Int, private val height
     }
 
     private fun loop() {
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) // WIREFRAME MODE
+         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) // WIREFRAME MODE
 
         var elapsedTime: Float
         var accumulator = 0f

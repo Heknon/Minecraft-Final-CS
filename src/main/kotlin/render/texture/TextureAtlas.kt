@@ -1,6 +1,6 @@
-package texture
+package render.texture
 
-import mesh.BlockMesh
+import org.lwjgl.opengl.GL30
 
 class TextureAtlas(textureFileName: String, private val gridSize: Int) {
     val texture: Texture = Texture(textureFileName)
@@ -24,6 +24,11 @@ class TextureAtlas(textureFileName: String, private val gridSize: Int) {
             Pair(xMin, yMax),
             Pair(xMax, yMax)
         )
+    }
+
+    fun activate() {
+        GL30.glActiveTexture(GL30.GL_TEXTURE0)
+        texture.bind()
     }
 
     fun empty(): AtlasTexture {

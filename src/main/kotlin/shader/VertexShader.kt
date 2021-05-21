@@ -9,6 +9,4 @@ class VertexShader(
     shaderCode,
     GL20.GL_VERTEX_SHADER,
     programId
-) {
-
-}
+)

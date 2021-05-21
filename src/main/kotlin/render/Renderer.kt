@@ -1,14 +1,18 @@
-import mesh.WorldObject
+package render
+
 import org.lwjgl.opengl.GL11.*
+import render.mesh.WorldObject
 import shader.FragmentShader
 import shader.ShaderProgram
 import shader.VertexShader
+import utility.loadResource
+import window.Window
 
-class Renderer(private val transformation: Transformation, private val camera: Camera) {
+class Renderer(private val camera: Camera, window: Window) {
     private val shaderProgram = ShaderProgram()
+    private val transformation: Transformer = Transformer(window, camera)
 
     init {
-        println("/fragment.glsl".loadResource())
         shaderProgram.registerShader(VertexShader("/vertex.glsl".loadResource(), shaderProgram.programId))
         shaderProgram.registerShader(FragmentShader("/fragment.glsl".loadResource(), shaderProgram.programId))
         shaderProgram.link()
@@ -17,7 +21,7 @@ class Renderer(private val transformation: Transformation, private val camera: C
         shaderProgram.createUniform("texture_sampler")
     }
 
-    fun render(window: Window, worldObjects: List<WorldObject>) {
+    fun render(window: Window, worldObjects: Collection<WorldObject>) {
         clear()
 
         if (window.shouldResize) {
