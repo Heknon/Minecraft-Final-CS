@@ -3,6 +3,7 @@ package utility
 import com.fasterxml.jackson.databind.ObjectMapper
 import world.chunk.block.BlockProvider
 import java.io.InputStream
+import java.lang.Math.floorMod
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
@@ -58,12 +59,12 @@ fun IntBuffer.putList(ints: List<Int>): IntBuffer {
     return this
 }
 
-fun <T> ((Int, Int, Int) -> T).advanceXyzDirectionBased(
-    x: Int,
-    y: Int,
-    z: Int,
+fun <T> ((Long, Long, Long) -> T).advanceXyzDirectionBased(
+    x: Long,
+    y: Long,
+    z: Long,
     direction: BlockProvider.Direction,
-    manipulation: ((Int) -> Int)? = null
+    manipulation: ((Long) -> Long)? = null
 ): T {
     var newX = x
     var newY = y
@@ -79,4 +80,12 @@ fun <T> ((Int, Int, Int) -> T).advanceXyzDirectionBased(
     }
 
     return this(newX, newY, newZ)
+}
+
+infix fun Long.modulo(size: Int): Long {
+    return floorMod(this, size.toLong())
+}
+
+infix fun Int.modulo(size: Int): Int {
+    return floorMod(this, size)
 }

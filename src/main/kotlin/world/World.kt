@@ -1,13 +1,14 @@
 package world
 
 import render.texture.TextureProvider
-import utility.advanceXyzDirectionBased
+import utility.modulo
 import world.chunk.Chunk
-import world.chunk.ChunkFactory
 import world.chunk.ChunkHandler
+import world.chunk.ChunkSettings
 import world.chunk.block.Block
 import world.chunk.block.BlockData
 import world.chunk.block.BlockProvider
+import java.math.BigInteger
 import java.util.concurrent.ThreadLocalRandom
 
 class World(textureProvider: TextureProvider) {
@@ -15,6 +16,14 @@ class World(textureProvider: TextureProvider) {
     private val chunkHandler = ChunkHandler(this, blockProvider, textureProvider)
     private val chunksLocationMap = mutableMapOf<Long, Chunk>()
     val chunks get() = chunksLocationMap.values
+
+    val neighborNeededBookkeeper = mutableMapOf<Long, MutableSet<Long>>()
+
+
+    val chunkSettings = ChunkSettings(16, 16, 16)
+    val chunkSizeX get() = chunkSettings.sizeX
+    val chunkSizeY get() = chunkSettings.sizeY
+    val chunkSizeZ get() = chunkSettings.sizeZ
 
     val blocks = MutableList(5) {
         MutableList(16 * 16 * 16) { _ ->
@@ -29,50 +38,63 @@ class World(textureProvider: TextureProvider) {
                 val chunk = chunkHandler.buildChunk(
                     Location(
                         this,
-                        x * ChunkFactory.SIZE_X.toDouble(),
+                        x * chunkSizeX.toDouble(),
                         0.0,
-                        z * ChunkFactory.SIZE_Z.toDouble()
+                        z * chunkSizeZ.toDouble()
                     ), blocks[ThreadLocalRandom.current().nextInt(1, 4)]
                 )
+                this.chunksLocationMap[chunk.location.compress()] = chunk
+
+                val neighbors = neighborNeededBookkeeper[chunk.location.compress()]
+                if (neighbors != null) {
+                    for (neighbor in neighbors) {
+                        chunkHandler.updateChunk(getChunkAt(neighbor.getLocation()))
+                    }
+
+                    neighborNeededBookkeeper[chunk.location.compress()] = mutableSetOf()
+                }
+
                 val endTime = System.currentTimeMillis() - startTime
                 //println("Elapsed mesh creation time: " + endTime + "ms")
-                this.chunksLocationMap[chunk.location.compress()] = chunk
             }
         }
 
-//        for (chunk in chunks) {
-//            chunkHandler.updateBlock(chunk.location.x - 2, 15.0, chunk.location.z - 2, getBlockDataById(0)!!, chunk)
-//        }
-
+        for (chunk in chunks) {
+            val startTime = System.currentTimeMillis()
+            chunkHandler.replaceBlock(
+                (chunk.location.x).toLong(),
+                15L, (chunk.location.z - 1).toLong(), getBlockDataById(0)!!
+            )
+            val endTime = System.currentTimeMillis() - startTime
+            println("Elapsed mesh creation time: " + endTime + "ms")
+        }
     }
 
-    fun getBlockAt(x: Double, y: Double, z: Double): Block? {
-        return getChunkAt(x, z)?.accessBlock(
-            (x % ChunkFactory.SIZE_X).toInt(),
-            y.toInt(),
-            (z % ChunkFactory.SIZE_Z).toInt()
-        )
+    fun getBlockAt(location: Location): Block? {
+        return getBlockAt(location.x.toLong(), location.y.toLong(), location.z.toLong())
     }
 
-    /**
-     * assumes chunk exists
-     */
-    fun blockNeighborsChunkFromDirection(x: Int, z: Int, direction: BlockProvider.Direction): Boolean {
-        return { x_: Int, _: Int, z_: Int ->
-            x_ < 0 || z_ < 0 || x_ >= ChunkFactory.SIZE_X || z_ >= ChunkFactory.SIZE_Z
-        }.advanceXyzDirectionBased(x, 0, z, direction)
+    fun getBlockAt(x: Long, y: Long, z: Long): Block? {
+        return getChunkAt(
+            x.toDouble(),
+            z.toDouble()
+        )?.localBlockAccess((x modulo chunkSizeX).toInt(), y.toInt(), (z modulo chunkSizeZ).toInt())
+    }
+
+    fun getNeighboringChunk(location: Location, direction: BlockProvider.Direction): Chunk? {
+        return getNeighboringChunk(location.x, location.z, direction)
     }
 
     fun getNeighboringChunk(x: Double, z: Double, direction: BlockProvider.Direction): Chunk? {
         // set x and z to coordinates of beginning of chunk
-        var newX = x - x % ChunkFactory.SIZE_X
-        var newZ = z - z % ChunkFactory.SIZE_Z
+        var newX = x - x % chunkSizeX
+        var newZ = z - z % chunkSizeZ
 
         when (direction) {
-            BlockProvider.Direction.South -> newZ -= ChunkFactory.SIZE_Z
-            BlockProvider.Direction.North -> newZ += ChunkFactory.SIZE_Z
-            BlockProvider.Direction.East -> newX += ChunkFactory.SIZE_X
-            BlockProvider.Direction.West -> newX -= ChunkFactory.SIZE_X
+            BlockProvider.Direction.South -> newZ -= chunkSizeZ
+            BlockProvider.Direction.North -> newZ += chunkSizeZ
+            BlockProvider.Direction.East -> newX += chunkSizeX
+            BlockProvider.Direction.West -> newX -= chunkSizeX
             else -> throw IllegalArgumentException("Must pass one of the 4 directions: North, East, South, West")
         }
 
@@ -94,9 +116,9 @@ class World(textureProvider: TextureProvider) {
     fun getChunkStartCoordinates(x: Double, z: Double): Location {
         return getChunkAt(x, z)?.location ?: Location(
             this,
-            x - x % ChunkFactory.SIZE_X,
+            x - x % chunkSizeX,
             0.0,
-            z - z % ChunkFactory.SIZE_Z
+            z - z % chunkSizeZ
         )
     }
 
@@ -104,9 +126,30 @@ class World(textureProvider: TextureProvider) {
         return blockProvider.blocks[id]
     }
 
+    fun getChunkStartX(x: Long): Double {
+        var newX = x
+        if (x < 0) {
+            newX -= 16
+        }
 
-    fun getChunkIndex(x: Long, z: Long): Long {
-        return (x - x % ChunkFactory.SIZE_X) and 0x7FFFFFF or ((z - z % ChunkFactory.SIZE_Z) and 0x7FFFFFF shl 27) or 0
+        return newX.toDouble()
+    }
+
+    fun getChunkStartZ(z: Long): Double {
+        var newZ = z
+
+        if (z < 0) {
+            newZ -= 17
+        }
+
+        return newZ.toDouble()
+    }
+
+    private fun getChunkIndex(x: Long, z: Long): Long {
+        val newX = getChunkStartX(x).toLong()
+        val newZ = getChunkStartZ(z).toLong()
+
+        return (newX - newX % chunkSizeX) and 0x7FFFFFF or ((newZ - newZ % chunkSizeZ) and 0x7FFFFFF shl 27) or 0
     }
 
     fun cleanup() {
@@ -114,6 +157,5 @@ class World(textureProvider: TextureProvider) {
             chunk.mesh.cleanup()
         }
     }
-
 
 }

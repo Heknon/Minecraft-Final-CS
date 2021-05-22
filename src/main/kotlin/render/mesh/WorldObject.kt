@@ -10,5 +10,5 @@ open class WorldObject(
     ),
     val rotation: Vector3f = Vector3f(0f, 0f, 0f),
     val scale: Float = 1f,
-    val mesh: Mesh
+    var mesh: Mesh
 )

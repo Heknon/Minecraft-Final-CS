@@ -4,122 +4,108 @@ import render.mesh.Mesh
 import render.texture.TextureProvider
 import utility.addAllFloatArray
 import utility.addAllIntArray
-import utility.advanceXyzDirectionBased
 import world.Location
+import world.World
 import world.chunk.block.Block
 import world.chunk.block.BlockData
 import world.chunk.block.BlockProvider
-import kotlin.math.floor
 
-class ChunkFactory(private val textureProvider: TextureProvider) {
-    /*
-    create dictionary for chunks that had no neighboring chunk so that when its neighboring chunk is added
-    we could remove the un neeeded faces.
-     */
-
-
+class ChunkFactory(private val world: World, private val textureProvider: TextureProvider) {
     fun buildChunk(location: Location, blocks: MutableList<BlockData>): Chunk {
         val res = buildChunkMesh(location, blocks)
         return Chunk(location, res.first, res.second)
     }
 
-    private fun buildChunkMesh(location: Location, blockDatas: List<BlockData>): Pair<MutableList<Block>, Mesh> {
-        val neighboringChunks = mutableMapOf<BlockProvider.Direction, Chunk?>()
-        val blocks = mutableListOf<Block>()
-
-        for (direction in arrayOf(
-            BlockProvider.Direction.North,
-            BlockProvider.Direction.East,
-            BlockProvider.Direction.South,
-            BlockProvider.Direction.West
-        )) {
-            neighboringChunks[direction] = location.world!!.getNeighboringChunk(location.x, location.z, direction)
-        }
+    fun buildChunkMesh(
+        chunkLocation: Location,
+        chunkBlockData: List<BlockData>
+    ): Pair<MutableList<Block>, Mesh> {
+        val chunkBlocks = mutableListOf<Block>()
 
         val positions = mutableListOf<Float>()
         val uvs = mutableListOf<Float>()
         val indices = mutableListOf<Int>()
 
-        var indexOffset = 0
-        var id = 0
+        var indicesOffset = 0
 
-        for (y in 0 until SIZE_Y) {
-            for (z in 0 until SIZE_Z) {
-                for (x in 0 until SIZE_X) {
-                    val currBlockData = accessBlock(x, y, z, blockDatas)!!
-                    val currBlock = Block(location.x + x, y.toDouble(), location.z + z, currBlockData)
-                    blocks.add(currBlock)
-                    if (currBlock.data.id == 0) continue
+        for (y in 0 until world.chunkSizeY) {
+            for (z in 0 until world.chunkSizeZ) {
+                for (x in 0 until world.chunkSizeX) {
+                    val currChunkBlockData = localChunkBlockAccess(x, y, z, chunkBlockData)!!
+                    val localBlockLocation = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
+                    val currChunkBlock = Block(
+                        Location(
+                            world,
+                            chunkLocation.x + x,
+                            y.toDouble(),
+                            chunkLocation.z + z
+                        ), currChunkBlockData
+                    )
+                    chunkBlocks.add(currChunkBlock)
+
+                    if (currChunkBlock.data.id == 0) continue // if block is air skip checks
+
                     for (direction in faceDirections) {
-                        var sharedBlockData = { x_: Int, y_: Int, z_: Int ->
-                            accessBlock(x_, y_, z_, blockDatas)
-                        }.advanceXyzDirectionBased(x, y, z, direction)
+                        val facingLocation = localBlockLocation.getNeighborLocation(direction)
+                        val facingChunk = world.getChunkAt(facingLocation)
+                        val facingBlockData =
+                            world.getBlockAt(currChunkBlock.location.getNeighborLocation(direction))?.data
+                                ?: localChunkBlockAccess(
+                                    facingLocation.x.toInt(),
+                                    facingLocation.y.toInt(),
+                                    facingLocation.z.toInt(),
+                                    chunkBlockData
+                                )
 
-                        val face =
-                            currBlockData.faces[direction] ?: error("Failed to find ${direction.name} face")
+                        val currChunkBlockFace = currChunkBlockData.faces[direction]!!
 
-                        // if sharedBlock is null or air add face of currBlock in current direction
-                        if (sharedBlockData == null || sharedBlockData.id == 0) {
-                            /*
-                             when shared block is null there it means the index given the accessBlock was out of bounds
-                             this means that it a neighboring block may lay in a neighboring chunk.
-                             we will see if our chunk has a neighboring chunk in current direction, if not, add face
-                             if it does, check if block next to current block in current direction exists, if not, add face
-                             */
-                            if (sharedBlockData == null &&
-                                x == SIZE_X - 1 || x == 0 || z == SIZE_Z - 1 || z == 0
-                            ) {
-                                // see if block belongs to another neighboring chunk, if it does remove face since it is covered.
-                                val neighboringChunk = neighboringChunks[direction]
-                                if (neighboringChunk != null
-                                    && location.world!!.blockNeighborsChunkFromDirection(x, z, direction)
-                                ) {
+                        val facingChunkStartX = world.getChunkStartX(facingLocation.x.toLong())
+                        val facingChunkStartZ = world.getChunkStartZ(facingLocation.z.toLong())
+                        if (facingChunk == null
+                            && (chunkLocation.x != facingChunkStartX
+                                    || chunkLocation.z != facingChunkStartZ)
+                        ) {
+                            val compressed = Location(world, facingChunkStartX, 0.0, facingChunkStartZ).compress()
 
-                                    // need to reset whichever the direction is advanced to to 0
-                                    val sharedBlockChunk = { x_: Int, y_: Int, z_: Int ->
-                                        println(currBlock)
-                                        location.world.getBlockAt(
-                                            x_.toDouble(), y_.toDouble(), z_.toDouble()
-                                        )
-                                    }.advanceXyzDirectionBased(
-                                        (location.x + x).toInt(), y, (location.z + z).toInt(), direction
-                                    )
-                                    println(sharedBlockChunk)
-                                    println("---------------------")
+                            if (!world.neighborNeededBookkeeper.containsKey(compressed))
+                                world.neighborNeededBookkeeper[compressed] = mutableSetOf()
 
-                                    if (sharedBlockChunk?.data?.id != 0) {
-                                        continue
-                                    }
-                                }
+                            if (!world.neighborNeededBookkeeper[compressed]!!.contains(chunkLocation.compress())) {
+                                world.neighborNeededBookkeeper[compressed]
+                                    ?.add(chunkLocation.compress())
                             }
 
-                            val pos = FloatArray(face.positions.size) {
+                        }
+
+                        // when this if statement is true `currChunkBlockFace` is added to chunk mesh
+                        if (facingBlockData == null || facingBlockData.id == 0) {
+                            val pos = FloatArray(currChunkBlockFace.positions.size) {
                                 return@FloatArray when {
                                     it % 3 == 0 -> {
                                         // x coordinate
-                                        face.positions[it] + x
+                                        currChunkBlockFace.positions[it] + x
                                     }
                                     it % 3 == 1 -> {
                                         // y coordinate
-                                        face.positions[it] + y
+                                        currChunkBlockFace.positions[it] + y
                                     }
                                     it % 3 == 2 -> {
                                         // z coordinate
-                                        face.positions[it] + z
+                                        currChunkBlockFace.positions[it] + z
                                     }
                                     else -> 0f
                                 }
                             }
 
                             var maxIndex = 0
-                            val idx = IntArray(face.indices.size) {
-                                if (maxIndex < face.indices[it]) maxIndex = face.indices[it]
-                                face.indices[it] + indexOffset
+                            val idx = IntArray(currChunkBlockFace.indices.size) {
+                                if (maxIndex < currChunkBlockFace.indices[it]) maxIndex = currChunkBlockFace.indices[it]
+                                currChunkBlockFace.indices[it] + indicesOffset
                             }
-                            indexOffset += maxIndex + 1
+                            indicesOffset += maxIndex + 1
 
                             positions.addAllFloatArray(pos)
-                            uvs.addAllFloatArray(face.uvs)
+                            uvs.addAllFloatArray(currChunkBlockFace.uvs)
                             indices.addAllIntArray(idx)
                         }
                     }
@@ -127,52 +113,33 @@ class ChunkFactory(private val textureProvider: TextureProvider) {
             }
         }
 
-        return Pair(blocks, textureProvider.createAtlasMesh(positions, uvs, indices))
+        return Pair(chunkBlocks, textureProvider.createAtlasMesh(positions, uvs, indices))
     }
 
+    /**
+     * Given local chunk coordinates, returns whether or not they are in the bounds of the chunk and
+     * have a valid index in chunk blocks list
+     */
+    fun localChunkCoordinatesOutOfBoundsCheck(localX: Int, localY: Int, localZ: Int): Boolean {
+        return localX < 0 || localX >= world.chunkSizeX
+                || localY < 0 || localY >= world.chunkSizeY
+                || localZ < 0 || localZ >= world.chunkSizeZ
+    }
+
+    /**
+     * given local chunk coordinates and list of chunk blocks, accesses chunk blocks
+     * and returns block data at x y z
+     * null if coordinates are out of bounds.
+     */
+    fun localChunkBlockAccess(localX: Int, localY: Int, localZ: Int, blocks: List<BlockData>): BlockData? {
+        if (localChunkCoordinatesOutOfBoundsCheck(localX, localY, localZ)) {
+            return null
+        }
+
+        return blocks.getOrNull(localX + localZ * world.chunkSizeX + localY * world.chunkSizeX * world.chunkSizeZ)
+    }
 
     companion object {
-        const val SIZE_X = 16
-        const val SIZE_Y = 16
-        const val SIZE_Z = 16
-
-        fun accessBlock(x: Int, y: Int, z: Int, blocks: List<BlockData>): BlockData? {
-            if (x < 0 || x >= SIZE_X || y < 0 || y >= SIZE_Y || z < 0 || z >= SIZE_Z) {
-                return null
-            }
-
-            return blocks.getOrNull(x + z * SIZE_X + y * SIZE_X * SIZE_Z)
-        }
-
-        fun xyzToIndex(x: Int, y: Int, z: Int): Int {
-            return x + z * SIZE_X + y * SIZE_X * SIZE_Z
-        }
-
-        fun indexToXyz(index: Int): IntArray {
-            return intArrayOf(index % 16, floor(index / 256f).toInt(), floor(index / 16f).toInt() % 16)
-        }
-
-        private val faceDirections = BlockProvider.Direction.values().dropLast(1)
-        private val blockAccessByDirection:
-                Map<BlockProvider.Direction, (Int, Int, Int, List<BlockData>) -> BlockData?> = mapOf(
-            Pair(BlockProvider.Direction.Up) { x, y, z, blocks ->
-                return@Pair accessBlock(x, y + 1, z, blocks)
-            },
-            Pair(BlockProvider.Direction.Down) { x, y, z, blocks ->
-                return@Pair accessBlock(x, y - 1, z, blocks)
-            },
-            Pair(BlockProvider.Direction.West) { x, y, z, blocks ->
-                return@Pair accessBlock(x - 1, y, z, blocks)
-            },
-            Pair(BlockProvider.Direction.East) { x, y, z, blocks ->
-                return@Pair accessBlock(x + 1, y, z, blocks)
-            },
-            Pair(BlockProvider.Direction.North) { x, y, z, blocks ->
-                return@Pair accessBlock(x, y, z + 1, blocks)
-            },
-            Pair(BlockProvider.Direction.South) { x, y, z, blocks ->
-                return@Pair accessBlock(x, y, z - 1, blocks)
-            }
-        )
+        val faceDirections = BlockProvider.Direction.values().dropLast(1)
     }
 }
