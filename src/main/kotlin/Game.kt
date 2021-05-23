@@ -13,7 +13,9 @@ fun main() {
 
 /*
 * NEAR FUTURE:
+* ASAP: Fix mouse input
 * Fix transparency, make renderer from transparent stuff
+* Make block accessing generate chunk if block doesnt exist, same with chunk - Chunk system
 * sprite renderer
 * World generation (Biomes n' shit)
 * Player class
@@ -39,7 +41,7 @@ fun main() {
 * Make world generation smarter, ores.
 * UI, hotbar, gui
 * Settings
-* world saving
+* world saving (use file sent to eden on discord a year ago as reference)
 * mobs
 * day and night
 * better, cooler, physically based lighting (https://learnopengl.com/PBR/Theory)
@@ -47,6 +49,10 @@ fun main() {
 * Voice chat
 * Launcher
 * Authentication - multiplayer authentication
+*
+* DONE:
+* TextureAtlas class that manages the texture pack, allows you to rescue a texture at certain row and column ✓
+* Smarter block class for building block and its texture from json file (https://github.com/Hopson97/MineCraft-One-Week-Challenge/tree/master/Res/Blocks) ✓
 * */
 
 class Game(private val title: String, private val width: Int, private val height: Int) : Runnable {
