@@ -7,7 +7,7 @@ import window.MouseInput
 import window.Window
 
 fun main() {
-    val main = Game("Minecraft", 600, 480)
+    val main = Game("Not a copy of Minecraft", 600, 480)
     main.run()
 }
 

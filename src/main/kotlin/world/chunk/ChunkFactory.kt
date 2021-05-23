@@ -47,7 +47,6 @@ class ChunkFactory(private val world: World, private val textureProvider: Textur
 
                     for (direction in faceDirections) {
                         val facingLocation = localBlockLocation.getNeighborLocation(direction)
-                        val facingChunk = world.getChunkAt(facingLocation)
                         val facingBlockData =
                             world.getBlockAt(currChunkBlock.location.getNeighborLocation(direction))?.data
                                 ?: localChunkBlockAccess(
@@ -58,24 +57,6 @@ class ChunkFactory(private val world: World, private val textureProvider: Textur
                                 )
 
                         val currChunkBlockFace = currChunkBlockData.faces[direction]!!
-
-                        val facingChunkStartX = world.getChunkStartX(facingLocation.x.toLong())
-                        val facingChunkStartZ = world.getChunkStartZ(facingLocation.z.toLong())
-                        if (facingChunk == null
-                            && (chunkLocation.x != facingChunkStartX
-                                    || chunkLocation.z != facingChunkStartZ)
-                        ) {
-                            val compressed = Location(world, facingChunkStartX, 0.0, facingChunkStartZ).compress()
-
-                            if (!world.neighborNeededBookkeeper.containsKey(compressed))
-                                world.neighborNeededBookkeeper[compressed] = mutableSetOf()
-
-                            if (!world.neighborNeededBookkeeper[compressed]!!.contains(chunkLocation.compress())) {
-                                world.neighborNeededBookkeeper[compressed]
-                                    ?.add(chunkLocation.compress())
-                            }
-
-                        }
 
                         // when this if statement is true `currChunkBlockFace` is added to chunk mesh
                         if (facingBlockData == null || facingBlockData.id == 0) {
@@ -112,6 +93,8 @@ class ChunkFactory(private val world: World, private val textureProvider: Textur
                 }
             }
         }
+
+
 
         return Pair(chunkBlocks, textureProvider.createAtlasMesh(positions, uvs, indices))
     }

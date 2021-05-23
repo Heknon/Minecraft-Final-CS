@@ -1,5 +1,7 @@
+import org.joml.Vector3f
 import render.Camera
 import render.Renderer
+import render.mesh.WorldObject
 import render.texture.TextureProvider
 import window.MouseInput
 import window.Window

@@ -15,6 +15,8 @@ class Chunk(
     internal val blocks: MutableList<Block>,
     mesh: Mesh
 ) : WorldObject(Vector3f(location.x.toFloat(), location.y.toFloat(), location.z.toFloat()), mesh = mesh) {
+
+
     /**
      * used local chunk coordinates, bottom left front is 0, 0, 0
      * top right back is chunkSizeX - 1, chunkSizeY - 1, chunkSizeZ - 1 (last coordinate)
@@ -44,12 +46,4 @@ class Chunk(
         return localX + localZ * location.world!!.chunkSizeX + localY * location.world.chunkSizeX * location.world.chunkSizeZ
     }
 
-    companion object {
-        val directions = arrayOf(
-            BlockProvider.Direction.North,
-            BlockProvider.Direction.East,
-            BlockProvider.Direction.South,
-            BlockProvider.Direction.West
-        )
-    }
 }
