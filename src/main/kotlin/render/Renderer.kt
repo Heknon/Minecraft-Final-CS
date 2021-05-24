@@ -10,7 +10,7 @@ import window.Window
 
 class Renderer(private val camera: Camera, window: Window) {
     private val shaderProgram = ShaderProgram()
-    private val transformation: Transformer = Transformer(window, camera)
+    val transformation: Transformer = Transformer(window, camera)
 
     init {
         shaderProgram.registerShader(VertexShader("/vertex.glsl".loadResource(), shaderProgram.programId))

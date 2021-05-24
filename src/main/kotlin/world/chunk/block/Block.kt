@@ -48,6 +48,6 @@ class Block(
     }
 
     fun updateData(blockData: BlockData) {
-        getOwningChunk()?.updateBlockData(location.x.toLong(), location.y.toLong(), location.z.toLong(), blockData)
+        location.world?.updateBlockData(this, blockData)
     }
 }

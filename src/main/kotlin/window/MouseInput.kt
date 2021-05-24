@@ -2,6 +2,7 @@ package window
 
 import org.joml.Vector2d
 import org.joml.Vector2f
+import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.GLFW.*
 
 
@@ -41,7 +42,6 @@ class MouseInput(private val window: Window) {
     }
 
     fun disableMouseVisibility() {
-        glfwSetInputMode(window.windowId, GLFW_CURSOR, GLFW_CURSOR_HIDDEN)
         glfwSetInputMode(window.windowId, GLFW_CURSOR, GLFW_CURSOR_DISABLED)
     }
 

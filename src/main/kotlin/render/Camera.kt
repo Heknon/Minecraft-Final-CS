@@ -9,9 +9,13 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 class Camera {
-    private val position: Vector3f = Vector3f()
-    private val rotation: Vector3f = Vector3f()
+    private val position: Vector3f = Vector3f(0f, 15f, 0f)
+    private val rotation: Vector3f = Vector3f(0f, 0f, 0f)
     val viewMatrix = Matrix4f()
+
+    val positionVector get() = Vector3f(position)
+    val rotationVector get() = Vector3f(rotation)
+    val viewMatrixClone get() = Matrix4f(viewMatrix)
 
     private val cameraIncrementationTracker = Vector3f()
 
@@ -63,7 +67,7 @@ class Camera {
         }
     }
 
-    fun updatePositioning(mouseInput: MouseInput) {
+    fun updatePositioning(interval: Float, mouseInput: MouseInput) {
         move(
             cameraIncrementationTracker.x * CAMERA_POSITION_STEP,
             cameraIncrementationTracker.y * CAMERA_POSITION_STEP,

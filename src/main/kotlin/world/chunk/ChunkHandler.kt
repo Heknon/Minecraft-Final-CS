@@ -17,15 +17,14 @@ class ChunkHandler(val world: World, val blockProvider: BlockProvider, texturePr
         return buildChunk(Location(world, x, y, z), blocks)
     }
 
-    fun replaceBlock(x: Long, y: Long, z: Long, blockData: BlockData) {
-        val chunk = world.getChunkAt(x.toDouble(), z.toDouble())
-        chunk?.replaceBlock(x, y, z, blockData)
+
+    fun remeshLocationTolerant(location: Location, chunk: Chunk?) {
         remeshChunk(chunk)
 
-        val blockNeighbors = world.getBlockAt(x, y, z)?.getNeighboringDirections()
+        val blockNeighbors = world.getBlockAt(location)?.getNeighboringDirections()
         if (blockNeighbors != null && blockNeighbors.isNotEmpty()) {
             for (direction in blockNeighbors.filter { it != BlockProvider.Direction.Up && it != BlockProvider.Direction.Down }) {
-                remeshChunk(world.getNeighboringChunk(x.toDouble(), z.toDouble(), direction))
+                remeshChunk(world.getNeighboringChunk(location.x, location.z, direction))
             }
 
         }

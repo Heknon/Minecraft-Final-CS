@@ -67,8 +67,27 @@ class World(textureProvider: TextureProvider) {
         return blockProvider.blocks[id]
     }
 
+    fun updateBlockData(block: Block, data: BlockData) {
+        val chunk = block.getOwningChunk()
+        chunk?.updateBlockData(
+            block.location.x.toLong(),
+            block.location.y.toLong(),
+            block.location.z.toLong(),
+            data
+        )
+        chunkHandler.remeshLocationTolerant(block.location, chunk)
+    }
+
     fun getBlockAt(location: Location): Block? {
-        return getBlockAt(location.x.toLong(), location.y.toLong(), location.z.toLong())
+        return getBlockAt(location.x, location.y, location.z)
+    }
+
+    fun getBlockAt(x: Double, y: Double, z: Double): Block? {
+        return getBlockAt(x.toLong(), y.toLong(), z.toLong())
+    }
+
+    fun getBlockAt(x: Float, y: Float, z: Float): Block? {
+        return getBlockAt(x.toLong(), y.toLong(), z.toLong())
     }
 
     fun getBlockAt(x: Long, y: Long, z: Long): Block? {

@@ -78,8 +78,8 @@ class Game(private val title: String, private val width: Int, private val height
 
     private fun init() {
         window = Window(width, height, title)
-        mouseInput = MouseInput(window)
         window.open()
+        mouseInput = MouseInput(window)
         frameHandler = FrameHandler(window, mouseInput)
     }
 
