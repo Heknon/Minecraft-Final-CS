@@ -8,7 +8,7 @@ import utility.putList
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
-class Mesh(val positions: List<Float>, val uvs: List<Float>, val indices: List<Int>?, private val texture: Texture) {
+class Mesh(val positions: List<Float>, val uvs: List<Float>, val indices: List<Int>?, private val texture: Texture?) {
     private var vaoId: Int = 0
 
     private val vertexCount: Int = indices?.size ?: positions.size
@@ -92,7 +92,7 @@ class Mesh(val positions: List<Float>, val uvs: List<Float>, val indices: List<I
         if (activateTexture) {
             glActiveTexture(GL_TEXTURE0)
 
-            glBindTexture(GL_TEXTURE_2D, texture.id)
+            if (texture != null) glBindTexture(GL_TEXTURE_2D, texture.id)
         }
 
         glBindVertexArray(vaoId)

@@ -1,9 +1,8 @@
 import org.lwjgl.Version
 import org.lwjgl.glfw.GLFW.glfwSetErrorCallback
 import org.lwjgl.glfw.GLFW.glfwTerminate
-import org.lwjgl.opengl.GL11.*
 import utility.Timer
-import window.MouseInput
+import window.Cursor
 import window.Window
 
 fun main() {
@@ -56,7 +55,6 @@ fun main() {
 * */
 
 class Game(private val title: String, private val width: Int, private val height: Int) : Runnable {
-    private lateinit var mouseInput: MouseInput
     private lateinit var window: Window
     private lateinit var frameHandler: FrameHandler
     private val timer: Timer = Timer()
@@ -79,8 +77,7 @@ class Game(private val title: String, private val width: Int, private val height
     private fun init() {
         window = Window(width, height, title)
         window.open()
-        mouseInput = MouseInput(window)
-        frameHandler = FrameHandler(window, mouseInput)
+        frameHandler = FrameHandler(window)
     }
 
     private fun loop() {
@@ -107,7 +104,7 @@ class Game(private val title: String, private val width: Int, private val height
     }
 
     private fun handleInput() {
-        mouseInput.input()
+        frameHandler.window.cursor.input(window)
         frameHandler.input()
 
     }

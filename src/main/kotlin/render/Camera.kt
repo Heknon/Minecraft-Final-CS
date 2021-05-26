@@ -1,16 +1,18 @@
 package render
 
+import org.joml.Math.toRadians
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
-import window.MouseInput
+import window.Cursor
 import window.Window
 import kotlin.math.cos
 import kotlin.math.sin
 
-class Camera {
-    private val position: Vector3f = Vector3f(0f, 15f, 0f)
-    private val rotation: Vector3f = Vector3f(0f, 0f, 0f)
+class Camera(
+    val position: Vector3f = Vector3f(0f, 15f, 0f),
+    val rotation: Vector3f = Vector3f(0f, 0f, 0f)
+) {
     val viewMatrix = Matrix4f()
 
     val positionVector get() = Vector3f(position)
@@ -42,40 +44,21 @@ class Camera {
     fun updateViewMatrix(): Matrix4f {
         viewMatrix.identity()
 
-        viewMatrix.rotate(Math.toRadians(rotation.x.toDouble()).toFloat(), Vector3f(1f, 0f, 0f))
-            .rotate(Math.toRadians(rotation.y.toDouble()).toFloat(), Vector3f(0f, 1f, 0f))
+        viewMatrix.rotate(toRadians(rotation.x), Vector3f(1f, 0f, 0f))
+            .rotate(toRadians(rotation.y), Vector3f(0f, 1f, 0f))
         viewMatrix.translate(-position.x, -position.y, -position.z)
         return viewMatrix
     }
 
-    fun handleInput(window: Window) {
-        cameraIncrementationTracker.set(0.0, 0.0, 0.0)
-        if (window.isKeyPressed(GLFW.GLFW_KEY_W)) {
-            cameraIncrementationTracker.z = -1f
-        } else if (window.isKeyPressed(GLFW.GLFW_KEY_S)) {
-            cameraIncrementationTracker.z = 1f
-        }
-        if (window.isKeyPressed(GLFW.GLFW_KEY_A)) {
-            cameraIncrementationTracker.x = -1f
-        } else if (window.isKeyPressed(GLFW.GLFW_KEY_D)) {
-            cameraIncrementationTracker.x = 1f
-        }
-        if (window.isKeyPressed(GLFW.GLFW_KEY_LEFT_SHIFT)) {
-            cameraIncrementationTracker.y = -1f
-        } else if (window.isKeyPressed(GLFW.GLFW_KEY_SPACE)) {
-            cameraIncrementationTracker.y = 1f
-        }
-    }
-
-    fun updatePositioning(interval: Float, mouseInput: MouseInput) {
+    fun updatePositioning(interval: Float, cursor: Cursor) {
         move(
             cameraIncrementationTracker.x * CAMERA_POSITION_STEP,
             cameraIncrementationTracker.y * CAMERA_POSITION_STEP,
             cameraIncrementationTracker.z * CAMERA_POSITION_STEP
         )
 
-        val rot = mouseInput.displVec
-        moveRotation((rot?.x ?: 0f) * MOUSE_SENSITIVITY, (rot?.y ?: 0f) * MOUSE_SENSITIVITY, 0f)
+        //val rot = cursor.displVec
+        //moveRotation((rot?.x ?: 0f) * MOUSE_SENSITIVITY, (rot?.y ?: 0f) * MOUSE_SENSITIVITY, 0f)
     }
 
     companion object {

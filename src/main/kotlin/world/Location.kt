@@ -2,7 +2,14 @@ package world
 
 import world.chunk.block.BlockProvider
 
-data class Location(val world: World?, var x: Double, var y: Double, var z: Double) {
+data class Location(
+    val world: World?,
+    val x: Double,
+    val y: Double,
+    val z: Double,
+    val yaw: Double = 0.0,
+    val pitch: Double = 0.0
+) {
     fun compress(): Long {
         return x.toLong() and 0x7FFFFFF or (z.toLong() and 0x7FFFFFF shl 27) or (y.toLong() shl 54)
     }

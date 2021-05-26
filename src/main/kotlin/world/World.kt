@@ -32,8 +32,8 @@ class World(textureProvider: TextureProvider) {
 
     fun generateWorld() {
         val startTime = System.currentTimeMillis()
-        for (z in -2 until 2) {
-            for (x in -2 until 2) {
+        for (z in 0 until 1) {
+            for (x in 0 until 1) {
                 val chunk = chunkHandler.buildChunk(
                     Location(
                         this,

@@ -22,8 +22,10 @@ class Window(width: Int, height: Int, title: String) {
             throw NotImplementedError("// TODO: Change window title and set accordingly")
         }
 
+    val cursor: Cursor
+
     var shouldResize = false
-    val windowId: Long
+    val id: Long
 
     init {
         GLFWErrorCallback.createPrint(System.err).set() // set default error callback to print to System.err stream
@@ -38,7 +40,7 @@ class Window(width: Int, height: Int, title: String) {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE)
 
         val window = glfwCreateWindow(width, height, title, NULL, NULL)
-        windowId = window
+        id = window
 
         if (window == NULL) {
             throw RuntimeException("Couldn't create GLFW window")
@@ -76,6 +78,8 @@ class Window(width: Int, height: Int, title: String) {
         glfwMakeContextCurrent(window)
         glfwSwapInterval(1) // enable v-sync
 
+        cursor = Cursor(this)
+
         GL.createCapabilities()
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_TEXTURE_2D)
@@ -85,25 +89,25 @@ class Window(width: Int, height: Int, title: String) {
     }
 
     fun open() {
-        glfwShowWindow(windowId)
+        glfwShowWindow(id)
     }
 
     fun isKeyPressed(keyCode: Int): Boolean {
-        return glfwGetKey(windowId, keyCode) == GLFW_PRESS
+        return glfwGetKey(id, keyCode) == GLFW_PRESS
     }
 
     fun shouldClose(): Boolean {
-        return glfwWindowShouldClose(windowId)
+        return glfwWindowShouldClose(id)
     }
 
     fun update() {
-        glfwSwapBuffers(windowId)
+        glfwSwapBuffers(id)
 
         glfwPollEvents() // poll for window events
     }
 
     fun shutdown() {
-        Callbacks.glfwFreeCallbacks(windowId)
-        glfwDestroyWindow(windowId)
+        Callbacks.glfwFreeCallbacks(id)
+        glfwDestroyWindow(id)
     }
 }

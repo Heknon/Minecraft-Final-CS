@@ -13,9 +13,11 @@ import java.lang.Math.floorMod
 class Chunk(
     val location: Location,
     internal val blocks: MutableList<Block>,
-    mesh: Mesh
-) : WorldObject(Vector3f(location.x.toFloat(), location.y.toFloat(), location.z.toFloat()), mesh = mesh) {
-
+    override var mesh: Mesh
+) : WorldObject {
+    override val position: Vector3f = Vector3f(location.x.toFloat(), location.y.toFloat(), location.z.toFloat())
+    override val rotation: Vector3f = Vector3f()
+    override val scale: Float = 1f
 
     /**
      * used local chunk coordinates, bottom left front is 0, 0, 0
