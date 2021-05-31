@@ -8,6 +8,8 @@ class Texture(fileName: String) {
     val id: Int
 
     init {
+        println(fileName)
+        println(this::class.java.getResourceAsStream(fileName))
         val decoder = PNGDecoder(this::class.java.getResourceAsStream(fileName))
         val buf = ByteBuffer.allocateDirect(4 * decoder.width * decoder.height)
         decoder.decode(buf, decoder.width * 4, PNGDecoder.Format.RGBA)

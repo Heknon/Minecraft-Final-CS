@@ -1,28 +1,33 @@
 package player
 
 import math.RayCaster
+import org.joml.Math.round
 import org.joml.Math.toRadians
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.*
 import render.Camera
 import render.Renderer
+import render.Transformer
 import render.mesh.Mesh
+import utility.toLocation
 import window.Window
 import world.World
 import kotlin.math.cos
+import kotlin.math.floor
 import kotlin.math.sin
 
 class Player(
     override val position: Vector3f,
     override val rotation: Vector3f,
     private var world: World,
-    override var mesh: Mesh
+    override var mesh: Mesh,
+    window: Window
 ) : Entity {
     override val velocity: Vector3f = Vector3f()
     override val scale: Float = 1f
 
     internal val camera = Camera(position, rotation)
-    private val rayCaster = RayCaster(camera)
+    private val rayCaster = RayCaster(camera, window)
 
     private var acceleration = Vector3f()
 
@@ -33,10 +38,16 @@ class Player(
     private val speed = 0.2f
     private val sprintSpeedMultiplier = 5
 
-    val lookingAt = rayCaster.march(0.05f, reach) {
+    val lookingAt get() = rayCaster.march(0.05f, reach) {
         val block = world.getBlockAt(it.x, it.y, it.z)
         return@march block != null && block.data.id != 0
-    }
+    }?.toLocation(world)?.getBlock()
+
+    val lookingAtNeighbor get() = rayCaster.peekMarch(0.01f, reach) { curr, next ->
+        val currB = world.getBlockAt(curr.x, curr.y, curr.z)
+        val nextB = world.getBlockAt(next.x, next.y, next.z)
+        return@peekMarch nextB != null && nextB.data.id != 0 && nextB != currB
+    }.toLocation(world).getBlock()
 
     fun handleInput(window: Window) {
         handleKeyboard(window)

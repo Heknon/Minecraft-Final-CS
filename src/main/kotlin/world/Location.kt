@@ -1,5 +1,6 @@
 package world
 
+import world.chunk.block.Block
 import world.chunk.block.BlockProvider
 
 data class Location(
@@ -24,6 +25,10 @@ data class Location(
             BlockProvider.Direction.Down -> Location(world, x, y - 1, z)
             else -> throw IllegalArgumentException("Must pass real direction such as: North, South, East, West, Up, Down")
         }
+    }
+
+    fun getBlock(): Block? {
+        return world?.getBlockAt(this)
     }
 }
 

@@ -14,6 +14,7 @@ class Camera(
     val rotation: Vector3f = Vector3f(0f, 0f, 0f)
 ) {
     val viewMatrix = Matrix4f()
+    var transformer: Transformer? = null
 
     val positionVector get() = Vector3f(position)
     val rotationVector get() = Vector3f(rotation)

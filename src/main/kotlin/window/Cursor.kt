@@ -26,7 +26,6 @@ class Cursor(private val window: Window) {
         glfwSetCursorPosCallback(window.id) { _: Long, xPos: Double, yPos: Double ->
             currentPos.x = xPos
             currentPos.y = yPos
-            println("$xPos, $yPos")
         }
 
         glfwSetCursorEnterCallback(window.id) { _: Long, entered: Boolean ->

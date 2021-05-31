@@ -9,7 +9,7 @@ class Block(
     var data: BlockData
 ) {
     override fun toString(): String {
-        return "Block(location: $location)"
+        return "Block(location: $location, id: ${data.id})"
     }
 
     /**

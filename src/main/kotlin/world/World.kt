@@ -21,7 +21,7 @@ class World(textureProvider: TextureProvider) {
 
     val chunkSettings = ChunkSettings(16, 16, 16)
     val chunkSizeX get() = chunkSettings.sizeX
-    val chunkSizeY get() = chunkSettings.sizeY
+    val chunkSizeY get() = chunkSettings.sizeY - 5
     val chunkSizeZ get() = chunkSettings.sizeZ
 
     val blocks = MutableList(5) {

@@ -1,6 +1,9 @@
 package utility
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.joml.Vector3f
+import world.Location
+import world.World
 import world.chunk.block.BlockProvider
 import java.io.InputStream
 import java.lang.Math.floorMod
@@ -88,4 +91,8 @@ infix fun Long.modulo(size: Int): Long {
 
 infix fun Int.modulo(size: Int): Int {
     return floorMod(this, size)
+}
+
+fun Vector3f.toLocation(world: World? = null): Location {
+    return Location(world, this.x.toDouble(), this.y.toDouble(), this.z.toDouble())
 }

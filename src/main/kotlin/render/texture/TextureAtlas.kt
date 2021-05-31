@@ -29,6 +29,7 @@ class TextureAtlas(textureFileName: String, private val gridSize: Int) {
     fun activate() {
         GL30.glActiveTexture(GL30.GL_TEXTURE0)
         texture.bind()
+        texture.bind()
     }
 
     fun empty(): AtlasTexture {

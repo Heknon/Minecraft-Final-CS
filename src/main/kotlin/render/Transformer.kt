@@ -5,6 +5,11 @@ import render.mesh.WorldObject
 import window.Window
 
 class Transformer(private val window: Window, private val camera: Camera) {
+
+    init {
+        camera.transformer = this
+    }
+
     private val projectionMatrix = Matrix4f()
     private val modelView = Matrix4f()
 
