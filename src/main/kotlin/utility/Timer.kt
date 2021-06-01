@@ -7,10 +7,10 @@ class Timer {
         return System.nanoTime() / 1_000_000_000.0
     }
 
-    fun getElapsedTime(): Float {
+    fun getElapsedTime(reset: Boolean = true): Float {
         val time = getTime()
         val elapsedTime = time - lastLoopTime
-        lastLoopTime = time
+        if (reset) lastLoopTime = time
         return elapsedTime.toFloat()
     }
 

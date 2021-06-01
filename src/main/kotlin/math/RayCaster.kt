@@ -7,13 +7,14 @@ import org.joml.Vector4f
 import render.Camera
 import render.Transformer
 import window.Window
+import world.World
 import java.awt.Cursor
 import java.lang.Math.toRadians
 import kotlin.math.abs
 import kotlin.math.sin
 import kotlin.math.tan
 
-class RayCaster(private val camera: Camera, private val window: Window) {
+class RayCaster(private val camera: Camera, private val window: Window, world: World) {
     private val start = camera.positionVector
     val end = camera.positionVector
     val direction = camera.rotationVector

@@ -27,7 +27,7 @@ class Player(
     override val scale: Float = 1f
 
     internal val camera = Camera(position, rotation)
-    private val rayCaster = RayCaster(camera, window)
+    private val rayCaster = RayCaster(camera, window, world)
 
     private var acceleration = Vector3f()
 
