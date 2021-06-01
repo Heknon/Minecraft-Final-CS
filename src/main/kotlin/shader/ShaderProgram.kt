@@ -15,7 +15,7 @@ class ShaderProgram {
         }
     }
 
-    fun link() {
+    fun link(): ShaderProgram {
         glLinkProgram(programId)
 
         if (glGetProgrami(programId, GL_LINK_STATUS) == 0) {
@@ -32,6 +32,8 @@ class ShaderProgram {
         if (glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
             System.err.println("Warning validating Shader code: ${glGetProgramInfoLog(programId, 1024)}")
         }
+
+        return this
     }
 
     fun registerShader(shader: Shader) {
@@ -44,6 +46,18 @@ class ShaderProgram {
 
     fun unbind() {
         glUseProgram(0)
+    }
+
+    fun setTextureMode(): ShaderProgram {
+        if (!uniformMap.containsKey("usesTextures")) createUniform("usesTextures")
+        setBool("usesTextures", true)
+        return this
+    }
+
+    fun setColorMode(): ShaderProgram {
+        if (!uniformMap.containsKey("usesTextures")) createUniform("usesTextures")
+        setBool("usesTextures", false)
+        return this
     }
 
     fun createUniform(name: String): ShaderProgram {
