@@ -5,6 +5,8 @@ import org.joml.Vector3f
 import org.joml.Vector3f.distance
 import org.joml.Vector4f
 import render.Camera
+import render.Ray
+import render.Renderer
 import render.Transformer
 import window.Window
 import java.awt.Cursor
@@ -46,7 +48,9 @@ class RayCaster(private val camera: Camera, private val window: Window) {
 
         println("START: ${start.x}, ${start.y}, ${start.z}")
 
-        val r = end.add(mouseRay.mul(6.0f))
+        val r = end.add(Vector3f(mouseRay).mul(6.0f))
+        Ray(camera.positionVector, mouseRay, 6f, camera.rotationVector)
+
         for (pos in bresenham3DWalk(start, r)) {
             println("POS: ${pos.x}, ${pos.y}, ${pos.z}")
             if (stopCondition(pos)) return pos

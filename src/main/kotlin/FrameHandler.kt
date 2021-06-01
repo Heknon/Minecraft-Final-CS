@@ -2,6 +2,7 @@ import org.joml.Vector3f
 import player.Player
 import render.Renderer
 import render.mesh.Mesh
+import render.mesh.TexturedMesh
 import render.texture.TextureProvider
 import window.Window
 import world.World
@@ -13,7 +14,7 @@ class FrameHandler(val window: Window) {
         Vector3f(0f, 15f, 0f),
         Vector3f(),
         world,
-        Mesh(listOf(), listOf(), listOf(), null),
+        TexturedMesh(mutableListOf(), mutableListOf(), null),
         window
     )
     private val renderer = Renderer(player.camera, window, textureProvider)

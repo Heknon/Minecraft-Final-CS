@@ -4,6 +4,8 @@ import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL11.*
 import render.mesh.Mesh
+import render.mesh.TexturedMesh
+import render.mesh.TexturedMeshIndexed
 import render.mesh.WorldObject
 import render.texture.Texture
 import render.texture.TextureProvider
@@ -20,29 +22,30 @@ class Renderer(private val camera: Camera, window: Window, val textureProvider: 
     val transformation: Transformer = Transformer(window, camera)
 
     val crosshairTexture = Texture("/textures/cross.png")
-    val crosshairMesh = Mesh(
-        listOf(
+    val crosshairMesh = TexturedMeshIndexed(
+        mutableListOf(
             -0.5f, 0.5f, -0.5f,
             0.5f, 0.5f, -0.5f,
             0.5f, -0.5f, -0.5f,
             -0.5f, -0.5f, -0.5f,
         ),
-        listOf(
+        mutableListOf(
             0f, 0f,
             1f, 0f,
             1f, 1f,
             0f, 1f
         ),
-        listOf(
+        mutableListOf(
             0, 1, 2, 2, 3, 0
         ),
-        crosshairTexture
+        crosshairTexture,
+        true
     )
 
     init {
         worldShaderProgram.registerShader(VertexShader("/world_vertex.glsl".loadResource(), worldShaderProgram.programId))
         worldShaderProgram.registerShader(FragmentShader("/world_fragment.glsl".loadResource(), worldShaderProgram.programId))
-        worldShaderProgram.link()
+        worldShaderProgram.link().setTextureMode()
         worldShaderProgram.createUniform("projectionMatrix")
         worldShaderProgram.createUniform("modelView")
         worldShaderProgram.createUniform("texture_sampler")
@@ -87,13 +90,23 @@ class Renderer(private val camera: Camera, window: Window, val textureProvider: 
             worldObject.mesh.render()
         }
 
+        //worldShaderProgram.setColorMode()
+        for (ray in rays) {
+            worldShaderProgram.setMatrix4f(
+                "modelView", transformation.getModelViewMatrix(ray)
+            )
+
+            ray.mesh.render()
+        }
+        worldShaderProgram.setTextureMode()
+
 
         hudShaderProgram.bind()
         hudShaderProgram.setInt("crosshair_texture_sampler", 0)
         val aspect = window.width / window.height.toFloat()
         hudShaderProgram.setFloat("aspect", aspect)
         hudShaderProgram.setFloat("scale", 0.1f)
-        crosshairMesh.render(true)
+        crosshairMesh.render()
 
 
         hudShaderProgram.unbind()
@@ -105,5 +118,9 @@ class Renderer(private val camera: Camera, window: Window, val textureProvider: 
 
     fun cleanup() {
         worldShaderProgram.cleanup()
+    }
+
+    companion object {
+        val rays: MutableList<Ray> = mutableListOf()
     }
 }
