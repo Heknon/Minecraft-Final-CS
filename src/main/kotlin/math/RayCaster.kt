@@ -12,9 +12,7 @@ import window.Window
 import world.World
 import java.awt.Cursor
 import java.lang.Math.toRadians
-import kotlin.math.abs
-import kotlin.math.sin
-import kotlin.math.tan
+import kotlin.math.*
 
 class RayCaster(private val camera: Camera, private val window: Window, world: World) {
     private val start = camera.positionVector
@@ -144,18 +142,6 @@ class RayCaster(private val camera: Camera, private val window: Window, world: W
         return points
     }
 
-    fun peekMarch(step: Float, distance: Int, stopCondition: (curr: Vector3f, next: Vector3f) -> Boolean): Vector3f {
-        while (getLength() <= distance) {
-            val next = Vector3f(end)
-            step(next, step)
-            if (stopCondition(end, next)) break
-            end.x = next.x
-            end.y = next.y
-            end.z = next.z
-        }
-
-        return end
-    }
 
     fun getRayDirection(window: Window): Vector3f {
         val mouseX = window.width / 2
@@ -178,5 +164,7 @@ class RayCaster(private val camera: Camera, private val window: Window, world: W
         return mouseRay
     }
 
-
+    fun intbound(s: Float, ds: Float): Float {
+        return (if (ds > 0) ceil(s) - s else s - floor(s)) / abs(ds)
+    }
 }

@@ -31,31 +31,6 @@ class FrameHandler(val window: Window) {
         player.handleInput(window)
     }
 
-    fun getRayDirection(window: Window): Vector4f? {
-        val mouseX = window.width / 2
-        val mouseY = window.height / 2
-
-        val nx = (2f * mouseX) / window.width - 1
-        val ny = (2f * mouseY) / window.height - 1
-
-        val clipCoords = Vector4f(nx, ny, -1f, 1f)
-
-        val invertedProjection = player.camera.transformer!!.getProjectionMatrix().invert()
-        val eyeCoordsMat = invertedProjection.transform(clipCoords)
-        val eyeCoords = Vector4f(eyeCoordsMat.x, eyeCoordsMat.y, -1f, 0f)
-
-        val invertedView = player.camera.viewMatrixClone.invert()
-        val rayWorld = invertedView.transform(eyeCoords)
-        println("${rayWorld.x}, ${rayWorld.y}, ${rayWorld.z}")
-        val mouseRay = Vector3f(rayWorld.x, rayWorld.y, rayWorld.z)
-        mouseRay.normalize()
-
-        return Vector4f(mouseRay.x, mouseRay.y, mouseRay.z, 1f)
-    }
-
-    fun fuckcsjghouidfg() {
-
-    }
 
     var ran = false
 
@@ -63,36 +38,36 @@ class FrameHandler(val window: Window) {
     fun update(interval: Float) {
         player.update(interval)
 
-        if (timer.getElapsedTime(false) > 2) {
-            val b = getRayDirection(window)
-            val a = world.getChunkAt(player.position.x.toDouble(), player.position.z.toDouble())?.let {
-                val xyz = renderer.transformation.getProjectionMatrix()
-                    .mul(
-                        renderer.transformation.getModelViewMatrix(it)
-                    ).transform(b)
-
-                println("==-=-=-=-=-=")
-                println("XYZ: ${xyz.x}, ${xyz.y}, ${xyz.z}")
-                println("POS: ${player.position.x}, ${player.position.y}, ${player.position.z}")
-            }
-            timer.getElapsedTime(true)
-        }
+//        if (timer.getElapsedTime(false) > 2) {
+//            val b = getRayDirection(window)
+//            val a = world.getChunkAt(player.position.x.toDouble(), player.position.z.toDouble())?.let {
+//                val xyz = renderer.transformation.getProjectionMatrix()
+//                    .mul(
+//                        renderer.transformation.getModelViewMatrix(it)
+//                    ).transform(b)
+//
+//                println("==-=-=-=-=-=")
+//                println("XYZ: ${xyz.x}, ${xyz.y}, ${xyz.z}")
+//                println("POS: ${player.position.x}, ${player.position.y}, ${player.position.z}")
+//            }
+//            timer.getElapsedTime(true)
+//        }
 
 //        val block = a?.let { world.getBlockAt(it.x, -a.y, a.z) }
 //        println("AAA: $block")
 
 
-        if (window.cursor.isLeftButtonPressed() && !ran) {
+        if (window.cursor.isLeftButtonPressed() && !ran && timer.getElapsedTime(false) > 0.5) {
             //ran = true
             val lookingAt = player.lookingAt
             println("----------------=-=--=-=")
-
             println(lookingAt)
             println("----------------=-=--=-=")
             lookingAt?.updateData(world.getBlockDataById(0)!!)
+            timer.getElapsedTime(true)
 
         } else if (window.cursor.isRightButtonPressed()) {
-            player.lookingAtNeighbor?.updateData(world.getBlockDataById(3)!!)
+//            player.lookingAtNeighbor?.updateData(world.getBlockDataById(3)!!)
         }
 
     }

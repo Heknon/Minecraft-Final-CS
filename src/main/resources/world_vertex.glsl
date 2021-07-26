@@ -6,14 +6,12 @@ layout (location=2) in vec4 color;
 
 uniform mat4 projectionMatrix;
 uniform mat4 modelView;
-uniform bool usesTextures;
 
 out vec2 exTexCoord;
 out vec4 exColor;
 
 void main() {
-    if (!usesTextures) exTexCoord = texCoord;
-    else exColor = color;
+    exTexCoord = texCoord;
 
     gl_Position = projectionMatrix * modelView * vec4(position, 1.0);
 }
